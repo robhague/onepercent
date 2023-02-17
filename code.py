@@ -19,17 +19,30 @@ import morse
 end = ticks_ms()
 print(f"Morse setup time: {end-start}ms")
 
+# Identify device-specific pins
+if "tiny2040" in board.board_id:
+    print("Tiny2040 Config")
+    display_sda, display_scl = board.GP0, board.GP1
+    neopixel_pin = board.GP28
+    key_pin = board.GP27
+
+else:
+    print("Default (Pico) Config")
+    display_sda, display_scl = board.GP16, board.GP17
+    neopixel_pin = board.GP14
+    key_pin = board.GP15
+
 # Set up a keyboard device.
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayoutUS(kbd)
 
-led = digitalio.DigitalInOut(board.LED)
-led.direction = digitalio.Direction.OUTPUT
-led.value = True
-
+# Set up display
 displayio.release_displays()
-i2c = busio.I2C(scl=board.GP17, sda=board.GP16)
-display_bus = displayio.I2CDisplay(i2c, device_address=0x3c)
+display_i2c = busio.I2C(scl=display_scl, sda=display_sda)
+if display_i2c.try_lock():
+    print("I2C devices:", display_i2c.scan())
+    display_i2c.unlock()
+display_bus = displayio.I2CDisplay(display_i2c, device_address=0x3c)
 
 display = adafruit_displayio_ssd1306.SSD1306(display_bus, width=128, height=32)
 
@@ -41,9 +54,9 @@ label_group.append(line1)
 label_group.append(line2)
 display.show(label_group)
 
-pixels = neopixel.NeoPixel(board.GP14, 1)
+pixels = neopixel.NeoPixel(neopixel_pin, 1)
 
-key = digitalio.DigitalInOut(board.GP15)
+key = digitalio.DigitalInOut(key_pin)
 key.direction = digitalio.Direction.INPUT
 key.pull = digitalio.Pull.UP
 
