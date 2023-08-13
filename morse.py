@@ -1,4 +1,4 @@
-"""Morse Code Translator
+"""Morse Code Translator -- --- .-. ... .
 
 A module to convert morse code into symbols
 """
