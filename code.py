@@ -14,6 +14,13 @@ from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
 from supervisor import ticks_ms
 
+# Durations (ms) for various stages
+class Durations:
+    dit = 150 # Max duration for a dit; longer is a dah
+    clear = 1000 # Time to clear the display
+    symbol = 300 # Gap that signals the end of a symbol
+    space = 700 # Gap that signals a space
+
 # Set up morse table
 start = ticks_ms()
 import morse
@@ -88,11 +95,11 @@ async def time_key():
 
         pixels[0] = (128,128,128)
         with Timer() as keydown:
-            while not key.value and keydown.duration < 1000:
+            while not key.value and keydown.duration < Durations.clear:
                 await asyncio.sleep(0)
 
-        if keydown.duration < 1000:
-            is_dit = keydown.duration < 150
+        if keydown.duration < Durations.clear:
+            is_dit = keydown.duration < Durations.dit
             code = code[-8:]+('.' if is_dit else '_')
             if cursor:
                 cursor = cursor.dit if is_dit else cursor.dah
@@ -105,7 +112,7 @@ async def time_key():
 
         pixels[0] = (0,128,0)
         with Timer() as keyup:
-            while key.value and keyup.duration < 300: await asyncio.sleep(0)
+            while key.value and keyup.duration < Durations.symbol: await asyncio.sleep(0)
             if key.value and cursor and cursor.symbol:
                 text = text[-15:]+cursor.symbol
                 layout.write(cursor.symbol)
@@ -114,7 +121,7 @@ async def time_key():
                 code = line1.text = ""
 
             pixels[0] = (0,0,128)
-            while key.value and keyup.duration < 700: await asyncio.sleep(0)
+            while key.value and keyup.duration < Durations.space: await asyncio.sleep(0)
             if key.value:
                 text = text[-15:]+" "
                 line2.text = text
