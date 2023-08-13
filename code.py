@@ -1,4 +1,3 @@
-import board
 import busio
 import displayio
 import digitalio
@@ -14,6 +13,8 @@ from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
 from supervisor import ticks_ms
 
+import conf
+
 # Durations (ms) for various stages
 class Durations:
     dit = 150 # Max duration for a dit; longer is a dah
@@ -27,18 +28,7 @@ import morse
 end = ticks_ms()
 print(f"Morse setup time: {end-start}ms")
 
-# Identify device-specific pins
-if "tiny2040" in board.board_id:
-    print("Tiny2040 Config")
-    display_sda, display_scl = board.GP2, board.GP3
-    neopixel_pin = board.GP28
-    key_pin = board.GP27
 
-else:
-    print("Default (Pico) Config")
-    display_sda, display_scl = board.GP16, board.GP17
-    neopixel_pin = board.GP14
-    key_pin = board.GP15
 
 # Set up a keyboard device.
 kbd = Keyboard(usb_hid.devices)
@@ -46,7 +36,7 @@ layout = KeyboardLayoutUS(kbd)
 
 # Set up display
 displayio.release_displays()
-display_i2c = busio.I2C(scl=display_scl, sda=display_sda)
+display_i2c = busio.I2C(scl=conf.display_scl, sda=conf.display_sda)
 if display_i2c.try_lock():
     print("I2C devices:", display_i2c.scan())
     display_i2c.unlock()
@@ -62,9 +52,9 @@ label_group.append(line1)
 label_group.append(line2)
 display.show(label_group)
 
-pixels = neopixel.NeoPixel(neopixel_pin, 1)
+pixels = neopixel.NeoPixel(conf.neopixel_pin, 1)
 
-key = digitalio.DigitalInOut(key_pin)
+key = digitalio.DigitalInOut(conf.key_pin)
 key.direction = digitalio.Direction.INPUT
 key.pull = digitalio.Pull.UP
 
@@ -88,6 +78,7 @@ async def time_key():
     cursor = morse.root
 
     # Wait until the first keypress
+    while not key.value: await asyncio.sleep(0)
     while key.value: await asyncio.sleep(0)
 
     while True:
