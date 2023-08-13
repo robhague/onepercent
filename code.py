@@ -17,9 +17,9 @@ from supervisor import ticks_ms
 # Durations (ms) for various stages
 class Durations:
     dit = 150 # Max duration for a dit; longer is a dah
-    clear = 1000 # Time to clear the display
-    symbol = 300 # Gap that signals the end of a symbol
-    space = 700 # Gap that signals a space
+    clear = 1500 # Key-down time to clear the display
+    symbol = 400 # Gap that signals the end of a symbol
+    space = 1000 # Gap that signals a space
 
 # Set up morse table
 start = ticks_ms()
