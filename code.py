@@ -14,6 +14,7 @@ from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
 from supervisor import ticks_ms
 
+# Set up morse table
 start = ticks_ms()
 import morse
 end = ticks_ms()
@@ -60,15 +61,6 @@ key = digitalio.DigitalInOut(key_pin)
 key.direction = digitalio.Direction.INPUT
 key.pull = digitalio.Pull.UP
 
-async def update_count():
-    n = 0
-    while True:
-        n += 1
-        if not key.value:
-            pixels[0] = (100 * (n & 1), 50 * (n & 2), 100 * (n & 4))
-        else:
-            pixels[0] = (0,0,0)
-        await asyncio.sleep(0.01)
 
 class Timer:
     def __enter__(self):
@@ -135,9 +127,6 @@ async def time_key():
     
 
 async def main():
-    #counter_task = asyncio.create_task(update_count())
-    #key_task = asyncio.create_task(time_key())
-    #await asyncio.gather(counter_task, key_task)
     await time_key()
 
 asyncio.run(main())
