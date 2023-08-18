@@ -28,8 +28,6 @@ import morse
 end = ticks_ms()
 print(f"Morse setup time: {end-start}ms")
 
-
-
 # Set up a keyboard device.
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayoutUS(kbd)
@@ -53,6 +51,7 @@ label_group.append(line2)
 display.show(label_group)
 
 pixels = neopixel.NeoPixel(conf.neopixel_pin, 1)
+pixels[0] = (0,128,0)
 
 key = digitalio.DigitalInOut(conf.key_pin)
 key.direction = digitalio.Direction.INPUT
